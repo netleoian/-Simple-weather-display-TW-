@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset = "utf-8"><title>Line Charts</title>
+	 <link rel = "stylesheet" type = "text/css" href = "project.css">
+	 <style type = "text/css">
+		  </style>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript">
+       google.load('visualization', '1.1', {packages: ['line']});
+       function progress() //折線圖
+	   {
+          var local = $("#location").val();
+	    var data = new google.visualization.DataTable();
+          data.addColumn('string', '時間');//軸
+	    data.addColumn('number', '溫度');
+	    var options = {
+	       chart: {//折線圖標題
+		   title: '一週氣溫',
+		   subtitle: local
+	       },
+	       width: 900,
+	       height: 500,
+	    };
+	    var chart = new google.charts.Line(document.getElementById('out'));
+	    $.getJSON( "weather.php", function( out ) {//抓值
+	       var results = out.result["results"];
+	       $.each(results,function(i,item){
+	          var time = item["startTime"];//宣告變數time去抓startTime得直
+	          time= time.substring(5,10)+" " +time.substring(11,16);
+	          var value = parseInt(item["parameterName2"]);//宣告變數value去抓parameterName2得直並轉換型態
+	          var loc = item["locationName"];
+			  document.getElementById('out').innerHTML=out;
+	          if (loc == local){data.addRows([[time,value]]);//印出折線圖
+			  }
+			 
+	       });
+	       chart.draw(data, options);//印出折線圖
+	    });
+       };
+	   
+	   
+	    function progress2() //表格
+	   {
+        var local = $("#location").val();
+	    var chart = new google.charts.Line(document.getElementById('out'));
+	    $.getJSON( "weather.php", function( out ){//抓值
+	       var cout='<table border="1">';
+		   var results = out.result["results"];
+	       $.each(results,function(i,item){
+	          var time = item["startTime"];
+	          time= time.substring(5,10)+" " +time.substring(11,16);
+	          var value = parseInt(item["parameterName2"]);
+	          var loc = item["locationName"];
+			  var weather = item["parameterName1"];
+			 if(loc==local){
+			 cout+="<tr>";
+			 cout+="<td>"+loc+"</td>"+"<td>"+time+"</td>"+"<td>"+weather+"</td>";
+			 cout+="</tr>";}
+	      });
+		   cout+="</table>"; 
+		   document.getElementById('out').innerHTML=cout;
+	    });
+		};
+  </script>
+</head>
+<body>
+   <h1 style="text-shadow: -4px 4px 6px dimgrey; color:blue;">直轄市未來一週溫度預測</h1>
+   <form method = "post" action = "#">
+      <p>請選擇縣市:
+         <select id = "location">
+            <option selected>臺北市</option>
+            <option>新北市</option>
+            <option>桃園市</option>
+			<option>臺中市</option>
+			<option>臺南市</option>
+			<option>高雄市</option>
+         </select>
+      </p>
+      <p>
+         <input id = "submit" type="button" value = "氣溫折線圖" onclick="progress()"></p>
+		 <input id = "submit" type="button" value = "天氣預報" onclick="progress2()"></p>
+		 <p id="point"></p>
+		 <a href = "http://www.cwb.gov.tw/V7/forecast/">
+         <img src = "台灣.png" alt = "中央氣象局"/>
+		 <h3>~~~點擊台灣進入中央氣象局~~~<h3>
+		 </a>
+		<p></p>
+   </form>
+   <div id="out"></div>
+</body>
+</html>
